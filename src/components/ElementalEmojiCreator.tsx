@@ -713,13 +713,20 @@ export default function ElementalEmojiCreator() {
       <div className="container mx-auto p-4 max-w-7xl">
         <div className="flex flex-col space-y-4">
           <div className="text-center space-y-2">
-            
-            <h1 className="text-4xl font-bold tracking-tight">
-              God of Shapes
-            </h1>
+            <div className="flex items-center justify-center gap-2">
+              <img
+                src="/image-removebg-preview (2).png"
+                alt="God of Shapes"
+                className="h-12 w-12 object-contain"
+                style={{ minWidth: "3rem", minHeight: "3rem" }}
+              />
+              <h1 className="text-4xl font-bold tracking-tight">
+                God of Shapes
+              </h1>
+            </div>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Combine elements to discover new ones! Drag one element onto another
-              to see what happens.
+              Combine elements to discover new ones! Drag one element onto
+              another to see what happens.
             </p>
             <TooltipProvider>
               <Tooltip>
