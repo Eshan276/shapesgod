@@ -621,7 +621,7 @@ const Canvas = ({
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center p-2 border-b">
         <div className="flex gap-2">
-          <Button
+          {/* <Button
             variant={connectMode ? "default" : "outline"}
             size="sm"
             onClick={toggleConnectMode}
@@ -629,7 +629,7 @@ const Canvas = ({
           >
             <Plus className="h-4 w-4" />
             {connectMode ? "Cancel Connection" : "Connect Elements"}
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             size="sm"
@@ -640,10 +640,10 @@ const Canvas = ({
             Undo
           </Button>
         </div>
-        <Button variant="outline" size="sm" onClick={exportCanvas}>
+        {/* <Button variant="outline" size="sm" onClick={exportCanvas}>
           <Download className="h-4 w-4 mr-1" />
           Export
-        </Button>
+        </Button> */}
       </div>
       <div
         ref={(node) => {

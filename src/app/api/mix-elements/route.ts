@@ -22,7 +22,8 @@ export async function POST(request: Request) {
 
     // Call the Shapes API
     const response = await shapesClient.chat.completions.create({
-      model: "shapesinc/elementcreator",
+      // model: "shapesinc/elementcreator",
+      model:"shapesinc/elementcreatorv2",
       messages: [
         {
           role: "system",
