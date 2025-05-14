@@ -713,11 +713,12 @@ export default function ElementalEmojiCreator() {
       <div className="container mx-auto p-4 max-w-7xl">
         <div className="flex flex-col space-y-4">
           <div className="text-center space-y-2">
+            
             <h1 className="text-4xl font-bold tracking-tight">
-              Elemental Emoji Creator
+              God of Shapes
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Combine elements to discover new ones! Drag one emoji onto another
+              Combine elements to discover new ones! Drag one element onto another
               to see what happens.
             </p>
             <TooltipProvider>
