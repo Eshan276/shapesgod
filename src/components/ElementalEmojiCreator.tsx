@@ -20,85 +20,6 @@ const ELEMENT_TYPES = {
   EMOJI: "emoji",
 };
 
-// Define the basic elements and their combinations
-const elementCombinations = {
-  "🔥": {
-    "💧": { result: "💨", description: "Fire + Water = Steam" },
-    "🌍": { result: "🌋", description: "Fire + Earth = Volcano" },
-    "🌱": { result: "🔥", description: "Fire + Plant = More Fire" },
-    "❄️": { result: "💧", description: "Fire + Ice = Water" },
-    "🧊": { result: "💧", description: "Fire + Ice Cube = Water" },
-    "🪵": { result: "🪨", description: "Fire + Wood = Stone" },
-    "🧪": { result: "💥", description: "Fire + Chemical = Explosion" },
-  },
-  "💧": {
-    "🔥": { result: "💨", description: "Water + Fire = Steam" },
-    "🌍": { result: "🌱", description: "Water + Earth = Plant" },
-    "❄️": { result: "🧊", description: "Water + Ice = Ice Cube" },
-    "⚡": { result: "💫", description: "Water + Electricity = Energy" },
-    "🪨": { result: "🏝️", description: "Water + Stone = Island" },
-    "🧪": { result: "🫧", description: "Water + Chemical = Bubbles" },
-  },
-  "🌍": {
-    "🔥": { result: "🌋", description: "Earth + Fire = Volcano" },
-    "💧": { result: "🌱", description: "Earth + Water = Plant" },
-    "💨": { result: "🏜️", description: "Earth + Air = Desert" },
-    "🌱": { result: "🌳", description: "Earth + Plant = Tree" },
-    "⚡": { result: "🪨", description: "Earth + Electricity = Stone" },
-    "🧪": { result: "🌋", description: "Earth + Chemical = Volcano" },
-  },
-  "💨": {
-    "🔥": { result: "🌪️", description: "Air + Fire = Tornado" },
-    "💧": { result: "☁️", description: "Air + Water = Cloud" },
-    "🌍": { result: "🏜️", description: "Air + Earth = Desert" },
-    "❄️": { result: "🌨️", description: "Air + Ice = Snow" },
-    "⚡": { result: "🌩️", description: "Air + Electricity = Storm" },
-    "🧪": { result: "☁️", description: "Air + Chemical = Cloud" },
-  },
-  "❄️": {
-    "🔥": { result: "💧", description: "Ice + Fire = Water" },
-    "💧": { result: "🧊", description: "Ice + Water = Ice Cube" },
-    "💨": { result: "🌨️", description: "Ice + Air = Snow" },
-    "🌍": { result: "❄️", description: "Ice + Earth = More Ice" },
-    "⚡": { result: "💫", description: "Ice + Electricity = Energy" },
-    "🧪": { result: "🧪", description: "Ice + Chemical = Chemical" },
-  },
-  "⚡": {
-    "🔥": { result: "🔆", description: "Electricity + Fire = Light" },
-    "💧": { result: "💫", description: "Electricity + Water = Energy" },
-    "🌍": { result: "🪨", description: "Electricity + Earth = Stone" },
-    "💨": { result: "🌩️", description: "Electricity + Air = Storm" },
-    "❄️": { result: "💫", description: "Electricity + Ice = Energy" },
-    "🧪": { result: "☢️", description: "Electricity + Chemical = Radiation" },
-  },
-  "🧪": {
-    "🔥": { result: "💥", description: "Chemical + Fire = Explosion" },
-    "💧": { result: "🫧", description: "Chemical + Water = Bubbles" },
-    "🌍": { result: "🌋", description: "Chemical + Earth = Volcano" },
-    "💨": { result: "☁️", description: "Chemical + Air = Cloud" },
-    "❄️": { result: "🧪", description: "Chemical + Ice = Chemical" },
-    "⚡": { result: "☢️", description: "Chemical + Electricity = Radiation" },
-  },
-  "🌱": {
-    "🔥": { result: "🔥", description: "Plant + Fire = Fire" },
-    "💧": { result: "🌿", description: "Plant + Water = Herb" },
-    "🌍": { result: "🌳", description: "Plant + Earth = Tree" },
-    "💨": { result: "🌾", description: "Plant + Air = Wheat" },
-    "❄️": { result: "❄️", description: "Plant + Ice = Ice" },
-    "⚡": { result: "🔥", description: "Plant + Electricity = Fire" },
-    "🧪": { result: "🌿", description: "Plant + Chemical = Herb" },
-  },
-  "🪨": {
-    "🔥": { result: "🌋", description: "Stone + Fire = Volcano" },
-    "💧": { result: "🏝️", description: "Stone + Water = Island" },
-    "🌍": { result: "⛰️", description: "Stone + Earth = Mountain" },
-    "💨": { result: "🏜️", description: "Stone + Air = Desert" },
-    "❄️": { result: "🧊", description: "Stone + Ice = Ice Cube" },
-    "⚡": { result: "💎", description: "Stone + Electricity = Diamond" },
-    "🧪": { result: "💎", description: "Stone + Chemical = Diamond" },
-  },
-};
-
 // Define the emoji categories and their elements
 const emojiCategories = [
   {
@@ -176,6 +97,12 @@ interface Connection {
   id: string;
   sourceId: string;
   targetId: string;
+}
+
+// Define interface for the API response
+interface MixResponse {
+  result: string;
+  description: string;
 }
 
 // Emoji element component
@@ -344,6 +271,18 @@ const ReactionNotification = ({
   );
 };
 
+// Loading indicator component
+const LoadingIndicator = () => {
+  return (
+    <div className="fixed inset-0 bg-background/80 flex items-center justify-center z-50">
+      <div className="flex flex-col items-center gap-2">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <p className="text-sm font-medium">Mixing elements...</p>
+      </div>
+    </div>
+  );
+};
+
 // Canvas component
 const Canvas = ({
   onElementDiscovered,
@@ -366,6 +305,7 @@ const Canvas = ({
   const [discoveredElements, setDiscoveredElements] = useState<Set<string>>(
     new Set()
   );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   // Save current state to history
@@ -397,33 +337,44 @@ const Canvas = ({
     }
   }, []);
 
-  // Process element combination
-  const processCombination = (element1: string, element2: string) => {
-    // Check if combination exists
-    if (
-      elementCombinations[element1] &&
-      elementCombinations[element1][element2]
-    ) {
-      return elementCombinations[element1][element2];
+  // Process element combination using backend API
+  const processCombination = async (element1: string, element2: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/mix-elements", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ element1, element2 }),
+      });
+
+      if (!response.ok) {
+        console.error("API Error:", response.statusText);
+        return null;
+      }
+
+      const data: MixResponse = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error calling API:", error);
+      return null;
+    } finally {
+      setIsLoading(false);
     }
-    // Check reverse combination
-    if (
-      elementCombinations[element2] &&
-      elementCombinations[element2][element1]
-    ) {
-      return elementCombinations[element2][element1];
-    }
-    return null;
   };
 
   // Handle element drop on another element
-  const handleElementDrop = (targetElement: Element, droppedElement: any) => {
+  const handleElementDrop = async (
+    targetElement: Element,
+    droppedElement: any
+  ) => {
     // Get the content of both elements
     const targetContent = targetElement.content;
     const droppedContent = droppedElement.content;
 
-    // Process the combination
-    const reaction = processCombination(targetContent, droppedContent);
+    // Process the combination using API
+    const reaction = await processCombination(targetContent, droppedContent);
 
     if (reaction) {
       // Create a new element at the target position
@@ -684,6 +635,7 @@ const Canvas = ({
           </div>
         )}
       </div>
+      {isLoading && <LoadingIndicator />}
       <ReactionNotification
         reaction={currentReaction}
         onClose={() => setCurrentReaction(null)}
