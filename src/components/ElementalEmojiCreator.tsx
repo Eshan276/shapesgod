@@ -24,56 +24,64 @@ const ELEMENT_TYPES = {
 const emojiCategories = [
   {
     name: "Basic Elements",
-    emojis: ["🔥", "💧", "🌍", "💨", "❄️", "⚡", "🧪"],
+    emojis: [
+      { emoji: "🔥", name: "Fire" },
+      { emoji: "💧", name: "Water" },
+      { emoji: "🌍", name: "Earth" },
+      { emoji: "💨", name: "Air" },
+      { emoji: "❄️", name: "Ice" },
+      { emoji: "⚡", name: "Electricity" },
+      { emoji: "🧪", name: "Chemical" },
+    ],
   },
   {
     name: "Nature",
     emojis: [
-      "🌱",
-      "🪨",
-      "🪵",
-      "🌳",
-      "🌿",
-      "🌾",
-      "🌵",
-      "🍄",
-      "🌸",
-      "🌼",
-      "🌞",
-      "🌚",
-      "🌙",
-      "⭐",
-      "☁️",
-      "🌧️",
-      "🌨️",
-      "🌩️",
-      "🌪️",
-      "🌫️",
+      { emoji: "🌱", name: "Plant" },
+      { emoji: "🪨", name: "Stone" },
+      { emoji: "🪵", name: "Wood" },
+      { emoji: "🌳", name: "Tree" },
+      { emoji: "🌿", name: "Herb" },
+      { emoji: "🌾", name: "Wheat" },
+      { emoji: "🌵", name: "Cactus" },
+      { emoji: "🍄", name: "Mushroom" },
+      { emoji: "🌸", name: "Flower" },
+      { emoji: "🌼", name: "Blossom" },
+      { emoji: "🌞", name: "Sun" },
+      { emoji: "🌚", name: "New Moon" },
+      { emoji: "🌙", name: "Crescent Moon" },
+      { emoji: "⭐", name: "Star" },
+      { emoji: "☁️", name: "Cloud" },
+      { emoji: "🌧️", name: "Rain" },
+      { emoji: "🌨️", name: "Snow" },
+      { emoji: "🌩️", name: "Storm" },
+      { emoji: "🌪️", name: "Tornado" },
+      { emoji: "🌫️", name: "Fog" },
     ],
   },
   {
     name: "Objects",
     emojis: [
-      "🧊",
-      "💎",
-      "🔋",
-      "💡",
-      "🔍",
-      "🧲",
-      "⚓",
-      "⚙️",
-      "🔧",
-      "🔨",
-      "🧰",
-      "📱",
-      "💻",
-      "🔌",
-      "📡",
-      "🧬",
-      "🧪",
-      "🧫",
-      "🧴",
-      "🧷",
+      { emoji: "🧊", name: "Ice Cube" },
+      { emoji: "💎", name: "Diamond" },
+      { emoji: "🔋", name: "Battery" },
+      { emoji: "💡", name: "Light Bulb" },
+      { emoji: "🔍", name: "Magnifier" },
+      { emoji: "🧲", name: "Magnet" },
+      { emoji: "⚓", name: "Anchor" },
+      { emoji: "⚙️", name: "Gear" },
+      { emoji: "🔧", name: "Wrench" },
+      { emoji: "🔨", name: "Hammer" },
+      { emoji: "🧰", name: "Toolbox" },
+      { emoji: "📱", name: "Phone" },
+      { emoji: "💻", name: "Computer" },
+      { emoji: "🔌", name: "Plug" },
+      { emoji: "📡", name: "Satellite" },
+      { emoji: "🧬", name: "DNA" },
+      { emoji: "🧪", name: "Test Tube" },
+      { emoji: "🧫", name: "Petri Dish" },
+      { emoji: "🧴", name: "Lotion" },
+      { emoji: "🧷", name: "Safety Pin" },
     ],
   },
   {
@@ -86,7 +94,8 @@ const emojiCategories = [
 interface Element {
   id: string;
   type: string;
-  content: string;
+  content: string; // emoji character
+  name: string; // element name
   left: number;
   top: number;
   isNew?: boolean;
@@ -107,38 +116,51 @@ interface MixResponse {
 
 // Emoji element component
 const EmojiElement = ({
-  emoji,
+  element,
   index,
   isNew = false,
 }: {
-  emoji: string;
+  element: { emoji: string; name: string };
   index: number;
   isNew?: boolean;
 }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ELEMENT_TYPES.EMOJI,
-    item: { type: ELEMENT_TYPES.EMOJI, content: emoji },
+    item: {
+      type: ELEMENT_TYPES.EMOJI,
+      content: element.emoji,
+      name: element.name,
+    },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
   }));
 
   return (
-    <div
-      ref={drag}
-      className={cn(
-        "text-3xl cursor-grab active:cursor-grabbing p-2 hover:bg-accent rounded-md transition-colors relative",
-        isDragging && "opacity-50",
-        isNew && "animate-pulse"
-      )}
-    >
-      {emoji}
-      {isNew && (
-        <span className="absolute -top-1 -right-1">
-          <Sparkles className="h-4 w-4 text-yellow-500" />
-        </span>
-      )}
-    </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            ref={drag}
+            className={cn(
+              "text-3xl cursor-grab active:cursor-grabbing p-2 hover:bg-accent rounded-md transition-colors relative",
+              isDragging && "opacity-50",
+              isNew && "animate-pulse"
+            )}
+          >
+            {element.emoji}
+            {isNew && (
+              <span className="absolute -top-1 -right-1">
+                <Sparkles className="h-4 w-4 text-yellow-500" />
+              </span>
+            )}
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{element.name}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
@@ -163,6 +185,7 @@ const CanvasElement = ({
       left: element.left,
       top: element.top,
       content: element.content,
+      name: element.name,
     },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
@@ -177,6 +200,7 @@ const CanvasElement = ({
           id: item.id || `element-${Date.now()}`,
           type: ELEMENT_TYPES.EMOJI,
           content: item.content,
+          name: item.name || "Unknown",
           left: element.left,
           top: element.top,
         });
@@ -188,47 +212,56 @@ const CanvasElement = ({
   }));
 
   return (
-    <motion.div
-      ref={(node) => {
-        drag(drop(node));
-      }}
-      className={cn(
-        "absolute cursor-grab active:cursor-grabbing text-4xl flex items-center justify-center",
-        isSelected && "ring-2 ring-primary ring-offset-2",
-        isOver && "scale-110 ring-2 ring-yellow-500 ring-offset-2",
-        element.isNew && "animate-bounce"
-      )}
-      style={{
-        left: element.left,
-        top: element.top,
-        opacity: isDragging ? 0.5 : 1,
-        zIndex: isSelected || isOver ? 10 : 1,
-      }}
-      animate={{
-        scale: isSelected ? 1.1 : isOver ? 1.2 : 1,
-        rotate: element.isNew ? [0, -10, 10, -5, 5, 0] : 0,
-      }}
-      transition={{ duration: 0.2 }}
-      onClick={onClick}
-    >
-      {element.content}
-      {isSelected && (
-        <button
-          className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-md"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-        >
-          <X className="h-3 w-3" />
-        </button>
-      )}
-      {element.isNew && (
-        <span className="absolute -top-2 -left-2">
-          <Sparkles className="h-5 w-5 text-yellow-500" />
-        </span>
-      )}
-    </motion.div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <motion.div
+            ref={(node) => {
+              drag(drop(node));
+            }}
+            className={cn(
+              "absolute cursor-grab active:cursor-grabbing text-4xl flex items-center justify-center",
+              isSelected && "ring-2 ring-primary ring-offset-2",
+              isOver && "scale-110 ring-2 ring-yellow-500 ring-offset-2",
+              element.isNew && "animate-bounce"
+            )}
+            style={{
+              left: element.left,
+              top: element.top,
+              opacity: isDragging ? 0.5 : 1,
+              zIndex: isSelected || isOver ? 10 : 1,
+            }}
+            animate={{
+              scale: isSelected ? 1.1 : isOver ? 1.2 : 1,
+              rotate: element.isNew ? [0, -10, 10, -5, 5, 0] : 0,
+            }}
+            transition={{ duration: 0.2 }}
+            onClick={onClick}
+          >
+            {element.content}
+            {isSelected && (
+              <button
+                className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-md"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
+            {element.isNew && (
+              <span className="absolute -top-2 -left-2">
+                <Sparkles className="h-5 w-5 text-yellow-500" />
+              </span>
+            )}
+          </motion.div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{element.name}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
@@ -287,7 +320,7 @@ const LoadingIndicator = () => {
 const Canvas = ({
   onElementDiscovered,
 }: {
-  onElementDiscovered: (emoji: string) => void;
+  onElementDiscovered: (element: { emoji: string; name: string }) => void;
 }) => {
   const [elements, setElements] = useState<Element[]>([]);
   const [connections, setConnections] = useState<Connection[]>([]);
@@ -338,7 +371,7 @@ const Canvas = ({
   }, []);
 
   // Process element combination using backend API
-  const processCombination = async (element1: string, element2: string) => {
+  const processCombination = async (element1: Element, element2: any) => {
     setIsLoading(true);
     try {
       const response = await fetch("/api/mix-elements", {
@@ -346,7 +379,10 @@ const Canvas = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ element1, element2 }),
+        body: JSON.stringify({
+          element1: element1.name,
+          element2: element2.name || "Unknown",
+        }),
       });
 
       if (!response.ok) {
@@ -369,19 +405,19 @@ const Canvas = ({
     targetElement: Element,
     droppedElement: any
   ) => {
-    // Get the content of both elements
-    const targetContent = targetElement.content;
-    const droppedContent = droppedElement.content;
-
     // Process the combination using API
-    const reaction = await processCombination(targetContent, droppedContent);
+    const reaction = await processCombination(targetElement, droppedElement);
 
     if (reaction) {
+      // Extract the name from the description (after the "=")
+      const namePart = reaction.description.split(" = ")[1] || "Unknown";
+
       // Create a new element at the target position
       const newElement: Element = {
         id: `element-${Date.now()}`,
         type: ELEMENT_TYPES.EMOJI,
         content: reaction.result,
+        name: namePart,
         left: targetElement.left + 50,
         top: targetElement.top + 50,
         isNew: true,
@@ -398,7 +434,11 @@ const Canvas = ({
         const newDiscovered = new Set(discoveredElements);
         newDiscovered.add(reaction.result);
         setDiscoveredElements(newDiscovered);
-        onElementDiscovered(reaction.result);
+
+        onElementDiscovered({
+          emoji: reaction.result,
+          name: namePart,
+        });
       }
 
       // Save to history
@@ -461,6 +501,7 @@ const Canvas = ({
           id: `element-${Date.now()}`,
           type: item.type,
           content: item.content,
+          name: item.name || "Unknown",
           left: clientOffset.x - canvasRect.left - 25,
           top: clientOffset.y - canvasRect.top - 25,
         };
@@ -646,11 +687,16 @@ const Canvas = ({
 
 // Main component
 export default function ElementalEmojiCreator() {
-  const [discoveredEmojis, setDiscoveredEmojis] = useState<string[]>([]);
+  const [discoveredEmojis, setDiscoveredEmojis] = useState<
+    Array<{ emoji: string; name: string }>
+  >([]);
 
-  const handleElementDiscovered = (emoji: string) => {
-    if (!discoveredEmojis.includes(emoji)) {
-      setDiscoveredEmojis([...discoveredEmojis, emoji]);
+  const handleElementDiscovered = (element: {
+    emoji: string;
+    name: string;
+  }) => {
+    if (!discoveredEmojis.some((item) => item.emoji === element.emoji)) {
+      setDiscoveredEmojis([...discoveredEmojis, element]);
     }
   };
 
@@ -694,6 +740,7 @@ export default function ElementalEmojiCreator() {
                       Connect elements with dotted lines to show relationships
                     </li>
                     <li>Build complex systems with your discovered elements</li>
+                    <li>Hover over elements to see their names</li>
                   </ol>
                 </TooltipContent>
               </Tooltip>
@@ -735,10 +782,10 @@ export default function ElementalEmojiCreator() {
                     >
                       {category.emojis.length > 0 ? (
                         <div className="grid grid-cols-4 gap-2">
-                          {category.emojis.map((emoji, index) => (
+                          {category.emojis.map((element, index) => (
                             <EmojiElement
                               key={`${category.name}-${index}`}
-                              emoji={emoji}
+                              element={element}
                               index={index}
                               isNew={
                                 category.name === "Discovered" &&
