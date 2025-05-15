@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { motion, AnimatePresence } from "framer-motion";
-import { X,  Undo, Info, Sparkles } from "lucide-react";
+import { X,  Undo, Info, Sparkles, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
@@ -870,6 +870,16 @@ export default function ElementalEmojiCreator() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+            <a
+              href="https://github.com/Eshan276"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center p-2 rounded hover:bg-accent transition-colors"
+              title="View on GitHub"
+            >
+              <Github className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors" />
+              <span className="sr-only">GitHub</span>
+            </a>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4 h-[calc(100vh-200px)]">
