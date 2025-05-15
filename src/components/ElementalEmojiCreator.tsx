@@ -4,9 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Undo, Download, Info, Sparkles } from "lucide-react";
+import { X,  Undo, Info, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Image from "next/image";
 import {
   Tooltip,
   TooltipContent,
@@ -116,6 +117,7 @@ interface MixResponse {
 }
 
 // Emoji element component
+// Emoji element component
 const EmojiElement = ({
   element,
   index,
@@ -125,7 +127,7 @@ const EmojiElement = ({
   index: number;
   isNew?: boolean;
 }) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [{ isDragging }, dragRef] = useDrag(() => ({
     type: ELEMENT_TYPES.EMOJI,
     item: {
       type: ELEMENT_TYPES.EMOJI,
@@ -137,12 +139,20 @@ const EmojiElement = ({
     }),
   }));
 
+  // Create a ref callback that TypeScript understands
+  const ref = useRef<HTMLDivElement>(null);
+  
+  // Use a useEffect to connect the drag ref
+  useEffect(() => {
+    dragRef(ref.current);
+  }, [dragRef]);
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            ref={drag}
+            ref={ref}
             className={cn(
               "text-3xl cursor-grab active:cursor-grabbing p-2 hover:bg-accent rounded-md transition-colors relative",
               isDragging && "opacity-50",
@@ -165,7 +175,7 @@ const EmojiElement = ({
   );
 };
 
-// Canvas element component
+
 const CanvasElement = ({
   element,
   isSelected,
@@ -179,7 +189,7 @@ const CanvasElement = ({
   onDelete: () => void;
   onDrop: (droppedElement: Element) => void;
 }) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [{ isDragging }, dragRef] = useDrag(() => ({
     type: ELEMENT_TYPES.EMOJI,
     item: {
       id: element.id,
@@ -193,7 +203,7 @@ const CanvasElement = ({
     }),
   }));
 
-  const [{ isOver }, drop] = useDrop(() => ({
+  const [{ isOver }, dropRef] = useDrop(() => ({
     accept: ELEMENT_TYPES.EMOJI,
     drop: (item: any) => {
       if (item.id !== element.id) {
@@ -212,14 +222,32 @@ const CanvasElement = ({
     }),
   }));
 
+  // Create a ref for the element
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Connect the drag and drop refs
+  useEffect(() => {
+    if (!ref.current) return;
+    
+    const currentRef = ref.current;
+    
+    // Apply the drag and drop refs
+    dragRef(currentRef);
+    dropRef(currentRef);
+    
+    return () => {
+      // Clean up refs
+      dragRef(null);
+      dropRef(null);
+    };
+  }, [dragRef, dropRef]);
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <motion.div
-            ref={(node) => {
-              drag(drop(node));
-            }}
+            ref={ref}
             className={cn(
               "absolute cursor-grab active:cursor-grabbing text-4xl flex items-center justify-center",
               isSelected && "ring-2 ring-primary ring-offset-2",
@@ -400,7 +428,7 @@ const Canvas = ({
     ) {
       saveToHistory();
     }
-  }, []);
+  }, [elements.length, connections.length, history.length, saveToHistory]);
 
   // Process element combination using backend API
   // Process element combination using backend API
@@ -747,7 +775,7 @@ const Canvas = ({
 
 // Main component
 export default function ElementalEmojiCreator() {
-  const { isAuthenticated, isLoading, error } = useAuth();
+  const {  isLoading, error } = useAuth();
   const [discoveredEmojis, setDiscoveredEmojis] = useState<
     Array<{ emoji: string; name: string }>
   >([]);
@@ -795,10 +823,18 @@ export default function ElementalEmojiCreator() {
         <div className="flex flex-col space-y-4">
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2">
-              <img
+              {/* <img
                 src="/image-removebg-preview (2).png"
                 alt="God of Shapes"
                 className="h-12 w-12 object-contain"
+                style={{ minWidth: "3rem", minHeight: "3rem" }}
+              /> */}
+              <Image
+                src="/image-removebg-preview (2).png"
+                alt="God of Shapes"
+                width={48}
+                height={48}
+                className="object-contain"
                 style={{ minWidth: "3rem", minHeight: "3rem" }}
               />
               <h1 className="text-4xl font-bold tracking-tight">
