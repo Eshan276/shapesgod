@@ -14,7 +14,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-
+import { authService } from "@/lib/auth-service";
+import { useAuth } from "@/components/AuthProvider";
 // Define the types of elements
 const ELEMENT_TYPES = {
   EMOJI: "emoji",
@@ -303,14 +304,45 @@ const ReactionNotification = ({
     </AnimatePresence>
   );
 };
-
+// Authentication error notification component
+const AuthErrorNotification = ({
+  visible,
+  message,
+  onRetry,
+}: {
+  visible: boolean;
+  message: string;
+  onRetry: () => void;
+}) => {
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-background/80 flex items-center justify-center z-50"
+        >
+          <div className="bg-card p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-xl font-bold mb-2">Authentication Error</h3>
+            <p className="mb-4 text-muted-foreground">{message}</p>
+            <div className="flex justify-end">
+              <Button onClick={onRetry}>Retry</Button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 // Loading indicator component
-const LoadingIndicator = () => {
+// Loading indicator component
+const LoadingIndicator = ({ message = "Loading..." }: { message?: string }) => {
   return (
     <div className="fixed inset-0 bg-background/80 flex items-center justify-center z-50">
       <div className="flex flex-col items-center gap-2">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-        <p className="text-sm font-medium">Mixing elements...</p>
+        <p className="text-sm font-medium">{message}</p>
       </div>
     </div>
   );
@@ -371,19 +403,31 @@ const Canvas = ({
   }, []);
 
   // Process element combination using backend API
+  // Process element combination using backend API
+  const [authError, setAuthError] = useState<string | null>(null);
   const processCombination = async (element1: Element, element2: any) => {
     setIsLoading(true);
     try {
+      // Get the authentication token
+      const token = await authService.ensureToken();
+
       const response = await fetch("/api/mix-elements", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           element1: element1.name,
           element2: element2.name || "Unknown",
         }),
       });
+
+      if (response.status === 401) {
+        // Handle authentication error
+        setAuthError("Your session has expired. Please try again.");
+        return null;
+      }
 
       if (!response.ok) {
         console.error("API Error:", response.statusText);
@@ -394,12 +438,21 @@ const Canvas = ({
       return data;
     } catch (error) {
       console.error("Error calling API:", error);
+      setAuthError("Failed to communicate with the server. Please try again.");
       return null;
     } finally {
       setIsLoading(false);
     }
   };
-
+  // Retry authentication and clear error
+  const handleAuthRetry = async () => {
+    setAuthError(null);
+    try {
+      await authService.requestNewToken();
+    } catch (error) {
+      setAuthError("Authentication failed. Please reload the page.");
+    }
+  };
   // Handle element drop on another element
   const handleElementDrop = async (
     targetElement: Element,
@@ -676,7 +729,14 @@ const Canvas = ({
           </div>
         )}
       </div>
-      {isLoading && <LoadingIndicator />}
+      {isLoading && <LoadingIndicator message="Mixing elements..." />}
+      {authError && (
+        <AuthErrorNotification
+          visible={!!authError}
+          message={authError}
+          onRetry={handleAuthRetry}
+        />
+      )}
       <ReactionNotification
         reaction={currentReaction}
         onClose={() => setCurrentReaction(null)}
@@ -687,6 +747,7 @@ const Canvas = ({
 
 // Main component
 export default function ElementalEmojiCreator() {
+  const { isAuthenticated, isLoading, error } = useAuth();
   const [discoveredEmojis, setDiscoveredEmojis] = useState<
     Array<{ emoji: string; name: string }>
   >([]);
@@ -707,7 +768,27 @@ export default function ElementalEmojiCreator() {
     }
     return category;
   });
+  // Display loading indicator while authenticating
+  if (isLoading) {
+    return <LoadingIndicator message="Initializing..." />;
+  }
 
+  // Display error message if authentication failed
+  if (error) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="bg-card p-6 rounded-lg shadow-lg max-w-md w-full">
+          <h3 className="text-xl font-bold mb-2">Authentication Error</h3>
+          <p className="mb-4 text-muted-foreground">{error}</p>
+          <div className="flex justify-end">
+            <Button onClick={() => window.location.reload()}>
+              Reload Page
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="container mx-auto p-4 max-w-7xl">

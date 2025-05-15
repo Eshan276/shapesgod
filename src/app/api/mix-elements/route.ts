@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
 
-// Initialize the OpenAI client with Shapes API
+
 const shapesClient = new OpenAI({
   apiKey: process.env.SHAPES_API_KEY || "",
   baseURL: "https://api.shapes.inc/v1",
@@ -9,10 +9,10 @@ const shapesClient = new OpenAI({
 
 export async function POST(request: Request) {
   try {
-    // Parse the request body
+    
     const { element1, element2 } = await request.json();
 
-    // Validate inputs
+    
     if (!element1 || !element2) {
       return NextResponse.json(
         { error: "Both elements are required" },
@@ -20,9 +20,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Call the Shapes API
+    
     const response = await shapesClient.chat.completions.create({
-      // model: "shapesinc/elementcreator",
+     
       model:"shapesinc/elementcreatorv2",
       messages: [
         {
@@ -47,10 +47,10 @@ export async function POST(request: Request) {
     }
 
     try {
-      // Parse the JSON response
+      
       const mixData = JSON.parse(mixContent);
 
-      // Return the mix result
+      
       return NextResponse.json({
         result: mixData.emoji,
         description: `${element1} + ${element2} = ${mixData.mix}`,
